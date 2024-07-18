@@ -63,15 +63,17 @@ public class TriggerCallbackThread {
                 // normal callback
                 while(!toStop){
                     try {
+                        //获取回调参数
                         HandleCallbackParam callback = getInstance().callBackQueue.take();
                         if (callback != null) {
 
                             // callback list param
                             List<HandleCallbackParam> callbackParamList = new ArrayList<HandleCallbackParam>();
+                            //移除队列中所有元素到callbackParamList中
                             int drainToNum = getInstance().callBackQueue.drainTo(callbackParamList);
                             callbackParamList.add(callback);
 
-                            // callback, will retry if error
+                            // callback, will retry if error  通知admin
                             if (callbackParamList!=null && callbackParamList.size()>0) {
                                 doCallback(callbackParamList);
                             }

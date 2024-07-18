@@ -50,46 +50,11 @@ public class SampleXxlJob {
 
     /**
      * 2、分片广播任务
-     *   方式1: 根据参数进行切分 例如 startDate = 2020-06-01, endDate = 2021-06-01
-     *   方式2: 查询出来所有的数据,通过id进行取模运行
-     *   方式3: 分页形式，默认每页1000条。单线程运行容易线程空转
      */
     @XxlJob("shardingJobHandler")
-    public void shardingJobHandler() throws Exception {
+    public void shardingJobHandler(String s) throws Exception {
 
-        // 分片参数
-        int shardIndex = XxlJobHelper.getShardIndex();
-        int shardTotal = XxlJobHelper.getShardTotal();
-        String param = XxlJobHelper.getJobParam();
-
-        logger.info("分片参数：当前分片序号 = {}, 总分片数 = {}", shardIndex, shardTotal);
-        List<Integer> indexList =  new ArrayList<Integer>();
-        // 业务逻辑
-        for (int i = 0; i < 10000; i++) {
-            if (i%shardTotal == shardIndex) {
-                logger.info("第 {} 片, 命中分片开始处理", i);
-                logger.info("参数: {}", param);
-                indexList.add(i);
-            }
-        }
-
-        // 分组后的列表
-        List<List<Integer>> groupedList = new ArrayList<>();
-        // 分组大小
-        int groupSize = 100;
-        for (int i = 0; i < indexList.size(); i += groupSize) {
-            // 计算当前分组的结束索引
-            int endIndex = Math.min(i + groupSize, indexList.size());
-            // 获取当前分组的元素
-            List<Integer> sublist = indexList.subList(i, endIndex);
-            // 添加到分组后的列表中
-            groupedList.add(sublist);
-        }
-        for (List<Integer> list : groupedList) {
-            logger.info("分组后的列表: {}", list);
-            //使用线程池进行操作
-        }
-    }
+     }
 
 
     /**

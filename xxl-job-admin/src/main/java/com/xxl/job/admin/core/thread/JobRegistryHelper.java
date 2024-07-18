@@ -59,17 +59,19 @@ public class JobRegistryHelper {
 				while (!toStop) {
 					try {
 						// auto registry group
+						// 1. 从xxl_job_group中找adress_type=0的数据，即自动注册的调度器
 						List<XxlJobGroup> groupList = XxlJobAdminConfig.getAdminConfig().getXxlJobGroupDao().findByAddressType(0);
 						if (groupList!=null && !groupList.isEmpty()) {
 
-							// remove dead address (admin/executor)
+							// 2. 从xxl_job_registry中根据update_time寻找超过心跳时间3倍（90s）的调度器，并将他们从表中移除
 							List<Integer> ids = XxlJobAdminConfig.getAdminConfig().getXxlJobRegistryDao().findDead(RegistryConfig.DEAD_TIMEOUT, new Date());
 							if (ids!=null && ids.size()>0) {
 								XxlJobAdminConfig.getAdminConfig().getXxlJobRegistryDao().removeDead(ids);
 							}
 
-							// fresh online address (admin/executor)
+							// 3. 定义局部变量appAddressMap
 							HashMap<String, List<String>> appAddressMap = new HashMap<String, List<String>>();
+							//4. 获取xxl_job_registry中的有效数据，registry_key就是appname，将所有EXECUTOR类型的数据放在Map<appname,List>appAddressMap中，让所有同名调度器在一个集合中。
 							List<XxlJobRegistry> list = XxlJobAdminConfig.getAdminConfig().getXxlJobRegistryDao().findAll(RegistryConfig.DEAD_TIMEOUT, new Date());
 							if (list != null) {
 								for (XxlJobRegistry item: list) {
@@ -87,8 +89,7 @@ public class JobRegistryHelper {
 									}
 								}
 							}
-
-							// fresh group address
+							// 5. 将appAddressMap中的地址按照xxl_job_group中的app_name获取,把地址拼接，逗号分割后保存在xxl_job_group.adress_list中，这样就保存了多个调度器地址
 							for (XxlJobGroup group: groupList) {
 								List<String> registryList = appAddressMap.get(group.getAppname());
 								String addressListStr = null;
